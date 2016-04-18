@@ -4,7 +4,7 @@ Description:
 Just give me a bit, the least significant's enough. Just a second we’re not broken, just very, very insecure. Running at rabit.pwning.xxx:7763
 ```
 
-Source for the challenge can be found [here](ctf/PlaidCTF 2016/rabit/rabit_8b98cc38ab1d0597ee51a30425d34d2e.tgz).
+Source for the challenge can be found [here](rabit_8b98cc38ab1d0597ee51a30425d34d2e.tgz).
 
 After you connect to the challenge and solve the hash, you are given N and the encrypted flag.  You then can have the server decrypt any submitted value and reply with the least significant bit (lsb).
 
@@ -28,4 +28,4 @@ I just had my script innefficiently run 1024 times and print the flag:
 PCTF{LSB_is_4ll_y0u_ne3d}
 ```
 
-The source can be found in [lsb.py](ctf/PlaidCTF 2016/rabit/lsb.py)
+The source can be found in [lsb.py](lsb.py)
