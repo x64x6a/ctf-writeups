@@ -66,7 +66,7 @@ for i in xrange(length):
 
     # even
     if b == '0':
-        upper = (upper + lower)/2 + 1
+        upper = (upper + lower)/2
     # odd
     else: 
         lower = (upper + lower)/2
@@ -80,8 +80,8 @@ print hex(int(lower))[2:].strip('L').decode('hex')
 
 """
 Flag:
-PCTF{LSB_is_4ll_y0u_ne3d}�����������������������������������������������������������������������������������������������������t
+PCTF{LSB_is_4ll_y0u_ne3d}
 
-PCTF{LSB_is_4ll_y0u_ne3d}�����������������������������������������������������������������������������������������������������r
+PCTF{LSB_is_4ll_y0u_ne3d}
 """
 
