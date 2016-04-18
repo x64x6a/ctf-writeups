@@ -1,21 +1,11 @@
-from Crypto.Util.number import bytes_to_long, long_to_bytes
 from hashlib import sha1
 import itertools
 import string
-import struct
 import socket
 import re
-import gmpy
 
 def encrypt(m, N):
     return pow(m, 2, N)
-padchar = '\x41'
-def pad(s):
-    assert(len(s) < N.bit_length() / 8)
-    padded = bytes_to_long(s.ljust(N.bit_length()/8, padchar))
-    while decrypt(padded, p, q) == None:
-        padded += 1
-    return padded
 
 def find_proof(proof,length=15,H=sha1):
     l = length-len(start)
