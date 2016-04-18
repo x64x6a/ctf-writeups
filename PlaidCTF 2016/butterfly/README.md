@@ -68,13 +68,19 @@ This value could range from 0x000 to 0x111.  For example, a 6 would perform a 1<
 
 The chosen modified address is the given address shifted right by 3 bits.
 So, to modify a byte to your desired value, you need to find what bits you need to XOR the original with.
-If you need to XOR the original with something like 0b01011010, you would send 
+If you need to XOR the original with something like 0b01011010, you would need to XOR it with 0b10, 0b1000, 0b10000, and 0b1000000 to get the proper result:
 ```
-original = original ^ (1<<1)
-original = original ^ (1<<1)
-original = original ^ (1<<1)
+original = original ^ (1<<1) # 0b10
+original = original ^ (1<<3) # 0b1000
+original = original ^ (1<<4) # 0b10000
+original = original ^ (1<<6) # 0b1000000
 ```
 
+To solve the challenge, your first sent line should change ```add rsp,48h``` at address 0x0000000000400860 to some other value to prevent stack change in order for you to have control over the stack and have it jump back to the beginning of the function.
 
+Next, we chose a static portion of memory to write shellcode (0x000000000040096C) within our base address range for mprotect(0x0000000000400000).  We saved the data stored there and calculated all of the XORs we would need to perform to change it to our desired shellcode.
 
+The last line we sent jumps to our shellcode and executes it.
+
+Our source code can be found in [butter.py](PlaidCTF 2016/butterfly/butter.py).
 
