@@ -28,4 +28,4 @@ I just had my script innefficiently run 1024 times and print the flag:
 PCTF{LSB_is_4ll_y0u_ne3d}
 ```
 
-The source can be found in [lsb.py](PlaidCTF%202016/rabit/lsb.py)
+The source can be found in [lsb.py](PlaidCTF 2016/rabit/lsb.py)
