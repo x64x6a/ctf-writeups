@@ -38,7 +38,7 @@ Client calculates:
 ```
 I = username
 
-a = rand()
+a = random.randint(2, N-3)
 A = pow(g, a, N)
 ```
 The client sends I and A to the server.
@@ -48,7 +48,7 @@ Server calculates:
 v = verifier
 s = salt
 
-b = rand()
+b = random.randint(2, N-3)
 B = (pow(g, b, N) + v) % N
 ```
 The server sends s and B to the client.
@@ -89,25 +89,25 @@ pow((pow(g, b, N) + pow(g, x, N) - pow(g, x, N)), a + x, N) = pow(pow(g, a, N) *
 
 So basically...
 ```
-((g^b)^a) * ((g^b)^x) = ((g^a) * (g^x))^b    MOD N
+((g^b)^a) * ((g^b)^x) = ((g^a) * (g^x))^b  MOD N
 ```
 
 From this, you can see that if both sides are multiplied by the modular inverse of ```g^x```, then it will be:
 ```
-(g^b)^a = (g^a)^b
+(g^b)^a = (g^a)^b  MOD N
 ```
 We can calculate this since we have ```g^b``` by subtracting the verifier from B!
 
 For this to work, I just modified the ```A``` value I sent to also be multiplied by the inverse if the verifier (```g^x```):
 ```
-a = rand()
-A = g^a MOD N
-newA = A * (v^-1)
+a = random.randint(2, N-3)
+A = pow(g, a, N)
+newA = (A * (v^-1)) % N
 ```
 
 After you send this to the server, you can calculated the session key by:
 ```
-K = H((B-v)^a)
+K = H(pow((B-v), a, N))
 ```
 
 Send this to the server and get the flag!
