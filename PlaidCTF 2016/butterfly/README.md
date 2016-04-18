@@ -6,7 +6,7 @@ Sometimes the universe smiles upon you. And sometimes, well, you just have to ro
 Notes: The binary has been updated. Please download again if you have the old version. The only difference is that the new version (that's running on the server) has added setbuf(stdout, NULL); line.
 ```
 
-They gave us a 64-bit [binary](PlaidCTF 2016/butterfly) running at butterfly.pwning.xxx:9999.
+They gave us a 64-bit [binary](butterfly_33e86bcc2f0a21d57970dc6907867bed) running at butterfly.pwning.xxx:9999.
 
 The binary seemed to do all its logic in the main function.  Here is the hexrays pseudocode:
 ```c
@@ -82,5 +82,5 @@ Next, we chose a static portion of memory to write shellcode (0x000000000040096C
 
 The last line we sent jumps to our shellcode and executes it.
 
-Our source code can be found in [butter.py](PlaidCTF 2016/butterfly/butter.py).
+Our source code can be found in [butter.py](butter.py).
 
