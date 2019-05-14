@@ -14,6 +14,9 @@ if __name__ == "__main__":
     else:
         p = remote("hotelcalifornia.quals2019.oooverflow.io", 7777)
 
+    # to solve, we need to store the original value at the offset in [rdi] from the `xaquire lock`
+    # by doing this, we will pass the `xtest` check and our code will execute
+
     ### non-NULL shellcode:
     ###  - reads the 1st random number from the stack
     ###  - stores it back using `xrelease mov`, which allows the `xtest` check to pass
