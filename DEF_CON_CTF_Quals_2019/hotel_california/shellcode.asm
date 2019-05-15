@@ -1,5 +1,5 @@
 ; non-null shellcode for hotel_california
-;   Note:  apparently `rel $` is `rip - 7`
+;   Note:  apparently `rel $` is `rip - (sizeof instr)`
 bits 64
 global    _start
 
