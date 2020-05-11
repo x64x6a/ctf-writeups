@@ -124,12 +124,19 @@ def selfie_overwrite_tcache(ncached):
 if __name__ == "__main__":
     elf = ELF("./house_of_sweets")
     if DEBUG:
+        # cleanup previous runs
         os.system('adb shell "rm /data/local/tmp/socket*"')
+
         io = process(["adb", "shell", "/data/local/tmp/house_of_sweets"])
         sleep(1)
+
+        # running gdbserver via adb shell
         cmd = """adb shell '/data/local/tmp/gdbserver --once --remote-debug :8888  --attach `pidof house_of_sweets`' >/dev/null 2>/dev/null &"""
         #cmd = """adb shell '/data/local/tmp/gdbserver --once --remote-debug :8888  --attach `pidof house_of_sweets`' >/dev/null &"""
         os.system(cmd)
+
+        # attach in another window with:
+        #   gdb-multiarch -x hos.gdb ./house_of_sweets
     else:
         io = remote("35.242.184.54", 1337)
 
