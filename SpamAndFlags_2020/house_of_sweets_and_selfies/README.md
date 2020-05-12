@@ -10,7 +10,7 @@ Welcome to the house of sweets and selfies. Come on in, there'll be heaps of fun
 
 I actually didn't have a working solution by the end of the competition.  I only found that we could overwrite a tcache entry 2 hours prior to competition end.
 
-The solution that I ended up finishing utilized a 64-byte heap overflow from when you modify a selfie.  It will append a PNG header to your given input and overflow into the next region 
+The solution that I ended up finishing utilized a 64-byte heap overflow from when you modify a selfie.  It will prepend a PNG header to your given input and overflow into the next region 
 
 This challenge required a bit of reading on jemalloc.  There are a number of slides and talks on the topic from Blackhat/Infiltrate that I went through to solve this challenge.  I also recommend using [shadow](https://github.com/CENSUS/shadow) with gdb when debugging.
 
