@@ -15,6 +15,8 @@ Episodes
 
 ## Overview
 
+This challenge allowed a user to create, open, read, write, close, and copy files inside of a container. Permissions were set in the container so that this challenge wasn't as simple as reading the flag file. The goal was to gain shell access and execute the setuid bit binary, `/freader`, to obtain the flag.
+
 Our solution to this challenge can be broken up into three steps:
 * Obtaining libc base from `/proc/self/maps`
 * Copy a file to trigger use-after-free to overwrite tcache entry with `free_hook`
@@ -32,9 +34,9 @@ do_copy("/proc/self/maps", "/dev/stdout")
 
 ---
 
-## Trigger UAF
+## Use-After-Free
 
-We eventually found a use-after-free vulnerability in `libcob` inside the copy file function, `CBL_COPY_FILE()`.  On line 4691, it retrieves an allocation from `cob_str_from_fld()`. On line 4698, the address is passed to `free()`. Then on line 4710, it triggers the UAF by reading the source file's contents into it.
+We eventually found a use-after-free vulnerability in `libcob` inside of the copy file function, `CBL_COPY_FILE()`.  On line 4691 of `fileio.c`, it retrieves an allocation, `fn1`, from `cob_str_from_fld()`. On line 4698, the pointer is passed to `free()`. Then on line 4710, it triggers the UAF by reading the source file's contents into it.
 
 ```c
 fn1 = cob_str_from_fld (cob_current_module->cob_procedure_parameters[0]);
@@ -110,16 +112,16 @@ CBL_COPY_FILE (unsigned char *fname1, unsigned char *fname2)
 
 ## Modifying Tcache
 
-The freed value above will be pushed into a tcachebin if it that tcachebin is not full.  We can control which tcachebin here through the size of the source filename, as the same buffer for the source's filename is also used for the source's contents.  We give a filename of length 0x30 so we use the 0x40 size tcachebin.
+The freed value above will be pushed into a tcachebin if it that tcachebin is not full.  We can control which tcachebin is used here through the size of the source's filename, as the same buffer for the source's filename is also used for the source's contents.
 
-To utilized this, we created and opened a file with a filename size of 0x30 (0x40 bin) with some arbitrary file size that differs.  We then wrote the address of `free_hook` into the file such that it would overwrite both of the freed memory's forward and back pointers.  We then copy this file with a new file with differing name size.  This will allocate the first filename, load it into the 0x40 tcache by freeing it, and then set the `free_hook` address as its forward and back pointers.  This will manipulate the tcache 0x40 bin such that the 2nd 0x40 allocation request will return the address to `free_hook`.
+We created and opened a file with a filename length of 0x30 with some arbitrary file size that differs.  The length of 0x30 is used so we fall into the 0x40 size tcachebin. We then wrote the address of `free_hook` into the file such that it would overwrite both of the freed memory's forward and back pointers.  We then copy this file with a new file with a differing filename size.  This will allocate the first filename, load it into the 0x40 tcache by freeing it, and then set the `free_hook` address as the chunk's forward and back pointers.  This will manipulate the tcache 0x40 bin such that the 2nd 0x40 allocation request will return the address to `free_hook`.  The next 0x40 allocation will return the freed address.
 
 The 0x40 tcachebin will now look something like this:
 ```c
 0x40 [  3]: 0x559497863700 —▸ 0x7f994e3368d8 (__free_hook-16) —▸ 0x7f994e9fd340 ◂— 0x7f994e9fd340
 ```
 
-We then created and opened a new file with some other filename length and a file size of 0x38 for the 0x40 bin.  The create will pop off the 1st 0x40 entry and the open will pop off the 2nd 0x40 entry, `free_hook`, into a data buffer.  We then write into this buffer by writing the magic one_gadget to the open file.  We then close this file to trigger a call to `free()` and in turn jumping to our one_gadget value in `free_hook`.  We ran `/freader` to obtain the flag.
+We then created and opened a new file with some other filename length and a file size of 0x38 for the 0x40 bin.  The create will pop off the 1st 0x40 entry and the open will pop off the 2nd 0x40 entry, `free_hook`, into a data buffer.  We then write into this buffer by writing to the newly open file the magic one_gadget.  We then close this file to trigger a call to `free()` and in turn jumping to our one_gadget value in `free_hook`.  We ran `/freader` to obtain the flag.
 
 ```
 [+] Opening connection to cobol.pwni.ng on port 3083: Done
