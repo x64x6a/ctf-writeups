@@ -1,5 +1,7 @@
 # The Cobol Job
 ```
+2021          1 Episode
+
 https://www.imdb.com/title/tt5295894/ Update: The "sketchy code" mentioned in a comment is not relevant to the solution.
 
 Director: panda
@@ -112,9 +114,9 @@ CBL_COPY_FILE (unsigned char *fname1, unsigned char *fname2)
 
 ## Modifying Tcache
 
-The freed value above will be pushed into a tcachebin if it that tcachebin is not full.  We can control which tcachebin is used here through the size of the source's filename, as the same buffer for the source's filename is also used for the source's contents.
+The freed value above will be pushed into a tcachebin if that tcachebin is not full.  We can control which tcachebin is used here through the size of the source's filename, as the same buffer for the source's filename is also used for the source's contents.
 
-We created and opened a file with a filename length of 0x30 with some arbitrary file size that differs.  The length of 0x30 is used so we fall into the 0x40 size tcachebin. We then wrote the address of `free_hook` into the file such that it would overwrite both of the freed memory's forward and back pointers.  We then copy this file with a new file with a differing filename size.  This will allocate the first filename, load it into the 0x40 tcache by freeing it, and then set the `free_hook` address as the chunk's forward and back pointers.  This will manipulate the tcache 0x40 bin such that the 2nd 0x40 allocation request will return the address to `free_hook`.  The next 0x40 allocation will return the freed address.
+We created and opened a file with a filename length of 0x30 with some arbitrary file size that differs.  The length of 0x30 is used so we fall into the 0x40 size tcachebin. We then wrote the address of `free_hook` into the file such that it would overwrite the freed memory's forward and back pointers.  We then copy this file with a new file with a different filename size.  This will allocate the first filename, load it into the 0x40 tcache by freeing it, and then set the `free_hook` address as the chunk's forward and back pointers.  This will manipulate the 0x40 tcachebin such that the 2nd 0x40 allocation request will return the address to `free_hook`.  The next 0x40 allocation will return the freed address.
 
 The 0x40 tcachebin will now look something like this:
 ```c
