@@ -13,7 +13,6 @@ Episodes
     nc plaidflix.pwni.ng 1337
 ```
 
----
 
 ## Overview
 
@@ -41,7 +40,6 @@ We uncovered 2 techniques to bypass this feature to convert the leak to valid he
 
 With a valid leaked address, we could then use the 2nd bug above to cause chunk misalignment with an unsorted bin and a tcache entry.  This allowed us to modify that tcache entry to have control over it's forward and back pointers. We overwrote these pointers with `__free_hook`, allowing us to overwrite the `__free_hook` offset with the address of `system()`.  We then forced a call to `free()` with `/bin/sh` to spawn a shell.
 
----
 
 ## Heap Leak
 
@@ -92,7 +90,6 @@ def defu(p):
 
 </details>
 
----
 
 ## Libc leak
 
@@ -102,7 +99,6 @@ Now that the 8th friend is in a small bin, it's forward pointer is a pointer to 
 
 We then show that movie and obtain a libc leak to use in our future exploit chain.
 
----
 
 ## Chunk Misalignment to Overwrite Tcache
 
@@ -277,5 +273,3 @@ free_hook: 0x7feb0d192e40
  $ cat flag.txt
 PCTF{N0w_YOu_Kn0w_S4f3_L1nk1ng!}
 ```
-
----
