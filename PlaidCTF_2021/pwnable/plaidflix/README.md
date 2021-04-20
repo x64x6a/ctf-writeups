@@ -17,7 +17,7 @@ Episodes
 
 ## Overview
 
-This challenge allows the managing of movies and friends. You can add or remove friends. You can create or delete a movie, and you can share a movie to an existing friend.  There is also a way to create or delete feedback with contact details if you select to delete your account. These items are all managed using malloc.
+This challenge allows the management of movies and friends. You can add or remove friends. You can create or delete a movie, and you can share a movie to an existing friend.  There is also a way to create or delete feedback with contact details if you select to delete your account. These items are all managed using malloc.
 
 We discovered two bugs:
 * When friends are removed and freed, they are not removed from a movie that was shared, causing a use-after-free
@@ -37,9 +37,9 @@ Source: https://sourceware.org/git/?p=glibc.git;a=blob;f=malloc/malloc.c;h=e2d7b
 
 More on safe linking can be read here: https://research.checkpoint.com/2020/safe-linking-eliminating-a-20-year-old-malloc-exploit-primitive/
 
-We uncovered 2 techniques to bypass this feature to convert the leak to a valid heap addresses.  One technique involves finding a NULL value that has gone through safe linking.  With this, we could simply shift the value right by 12 and potentially obtain the heap base.  Another method involved using a SMT solver to find the original pointer.  We decided to use the 2nd option to convert our leaks to valid heap address.
+We uncovered 2 techniques to bypass this feature to convert the leak to valid heap addresses.  One technique involves finding a NULL value that has gone through safe linking.  With this, we could simply shift the value right by 12 and potentially obtain the heap base.  Another method involved using a SMT solver to find the original pointer.  We decided to use the 2nd option to convert our leaks to valid heap addresses.
 
-With valid leaked address, we could then use the 2nd bug above to cause chunk misalignment with an unsorted bin and a tcache entry.  This allowed us to modify that tcache entry to have control over it's forward and back pointers. We overwrote these pointers with `__free_hook`, allowing us to overwrite the `__free_hook` offset with address of `system()`.  We then forced a call to `free()` with `/bin/sh` to spawn a shell.
+With a valid leaked address, we could then use the 2nd bug above to cause chunk misalignment with an unsorted bin and a tcache entry.  This allowed us to modify that tcache entry to have control over it's forward and back pointers. We overwrote these pointers with `__free_hook`, allowing us to overwrite the `__free_hook` offset with the address of `system()`.  We then forced a call to `free()` with `/bin/sh` to spawn a shell.
 
 ---
 
@@ -93,9 +93,9 @@ def defu(p):
 
 ## Libc leak
 
-To obtain a libc leak, we did something similar to the heap leak, except we filled the corresponding tcache bin.  We added 8 friends, shared a new movie with the 8th friend, and then removed all 8 friends.  After the first 7 friends are freed, the corresponding tcache bin will be filled, so that when the 8th friend is freed, it will be sent to an unsorted bin.  We then forced this this chunk to be sorted into a small bin by adding a new friend of another size.
+To obtain a libc leak, we did something similar to the heap leak, except we filled the corresponding tcache bin.  We added 8 friends, shared a new movie with the 8th friend, and then removed all 8 friends.  After the first 7 friends are freed, the corresponding tcache bin will be filled, so that when the 8th friend is freed, it will be sent to an unsorted bin.  We then forced this chunk to be sorted into a small bin by adding a new friend of another size.
 
-Now that the 8th friend is in a small bin, it's forward pointer is a pointer to somewhere in libc.  On ubuntu 20.04, this chunk could remain in the unsorted bin to have a valid libc address, but the challenge was running on ubuntu 20.10 and did not have libc address when it was in the unsorted bin.
+Now that the 8th friend is in a small bin, it's forward pointer is a pointer to somewhere in libc.  On Ubuntu 20.04, this chunk could remain in the unsorted bin to have a valid libc address, but the challenge was running on ubuntu 20.10 and did not have a libc address when it was in the unsorted bin.
 
 We then show that movie and obtain a libc leak to use in our future exploit chain.
 
@@ -103,9 +103,9 @@ We then show that movie and obtain a libc leak to use in our future exploit chai
 
 ## Chunk Misalignment to Overwrite Tcache
 
-With the heap and libc leaks, we could abuse the double free vulnerability in feedback messages when we choose to delete account.  This exploit is possible because pointer to feedback messages are not removed from the feedback list when they are freed, allow us to access them (free in this case) after they were "deleted".
+With the heap and libc leaks, we could abuse the double free vulnerability in feedback messages when we choose to delete our account.  This exploit is possible because pointer to feedback messages are not removed from the feedback list when they are freed, allowing us to access them (performing a free in this case) after they were "deleted".
 
-After we opt to delete our account, we filled the 0x110 tcache bin and then freed two other adjacent chunks so they would consolidate with eachother.
+After we opted to delete our account, we filled the 0x110 tcache bin and then freed two other adjacent chunks so they would consolidate with each other.
 To do this, we created 9 feedback messages and then deleted the first 6 and the 8th entries.  Each feedback message allocates a size 0x110 chunk, so this filled the 0x110 tcache bin.  We removed the 7th message so that it would be sent to the unsorted bin.  Next, we removed the chunk above, the 6th feedback, in order to force the 6th entry to consolidate with the 7th to create a single chunk.
 
 
@@ -163,7 +163,7 @@ The heap layout now looked like this:
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
-Our current goal is to write a feedback message into the above `feedback #7` so that it overflows into the `0xf0` unsorted chunk. We will then overwrite that unsorted chunks header with a new size of `0x1f0`, so that when the next feedback message will be allocated from this chunk. We then will write to this new chunk in order to overwrite the tcache entry at the above `feedback #8`.
+Our current goal is to write a feedback message into the above `feedback #7` so that it overflows into the `0xf0` unsorted chunk. We will then overwrite that unsorted chunks header with a new size of `0x1f0`, so that the next feedback message will be allocated from this chunk. We then will write to this new chunk in order to overwrite the tcache entry at the above `feedback #8`.
 
 Our first step was to clear the 0x110 tcache so we were using the tcache for messages instead of the unsorted bin. For this, we created 7 new feedback messages.  The first message allocation will be the location of the above `feedback #8`, located immediately after the unsorted bin.  We then wrote the value `0x1f0` for the `prev_size` value of a new fake chunk located after the unsorted bin (0x1f0 bytes after).  This was to bypass a security check.  The other feedback message values did not matter.
 
@@ -202,7 +202,7 @@ The heap layout now looked something like this:
 
 For the next steps, we performed some heap grooming so that `feedback #8` is in the tcache when we write to the unsorted chunk.
 
-We created a feedback message to hold a pointer to the modified unsorted chunk. Lets just call this `feedback #9`. We created one more feedback message to force a sort on the unsorted bin so the leftover chunk is placed into the small bin.  This allowed us to bypass some unsorted bin check we were hitting.
+We created a feedback message to hold a pointer to the modified unsorted chunk. Lets just call this `feedback #9`. We created one more feedback message to force a sort on the unsorted bin so the leftover chunk is placed into the small bin.  This allowed us to bypass an unsorted bin check we were hitting.
 We then deleted 2 feedback values we weren't using to tcache to allow us to create more feedback, as we have hit the maxed allowed feedback messages at this point (10).
 We freed `feedback #8` and then `feedback #9` to push them into tcache.
 
