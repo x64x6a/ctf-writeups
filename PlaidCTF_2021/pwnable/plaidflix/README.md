@@ -13,7 +13,6 @@ Episodes
     nc plaidflix.pwni.ng 1337
 ```
 
----
 
 ## Overview
 
@@ -41,7 +40,6 @@ We uncovered 2 techniques to bypass this feature to convert the leak to valid he
 
 With a valid leaked address, we could then use the 2nd bug above to cause chunk misalignment with an unsorted bin and a tcache entry.  This allowed us to modify that tcache entry to have control over it's forward and back pointers. We overwrote these pointers with `__free_hook`, allowing us to overwrite the `__free_hook` offset with the address of `system()`.  We then forced a call to `free()` with `/bin/sh` to spawn a shell.
 
----
 
 ## Heap Leak
 
@@ -67,16 +65,18 @@ From this function, we can pass the leaked safe link value and obtain a valid he
 
 After the CTF ended, we discovered other solutions that are likely more efficient:
 <details>
-  <summary>[hkraw's](https://gist.github.com/hkraw/0576a28c5436734d0fbe6d8ddd378143#file-plaidctf-plaidflix-py-L8)</summary>
+  <summary>hkraw's - https://gist.github.com/hkraw/0576a28c5436734d0fbe6d8ddd378143#file-plaidctf-plaidflix-py-L8</summary>
+
 ```python
 def demangle(obfus_ptr):
     o2 = (obfus_ptr >> 12) ^ obfus_ptr
     return (o2 >> 24) ^ o2
 ```
+
 </details>
 
 <details>
-  <summary>[MaherAzzou1zi's](https://github.com/MaherAzzouzi/LinuxExploitation/blob/master/PlaidCTF-plaidflix/solve.py#L83)</summary>
+  <summary>MaherAzzou1zi's - https://github.com/MaherAzzouzi/LinuxExploitation/blob/master/PlaidCTF-plaidflix/solve.py#L83</summary>
 
 ```python
 def defu(p):
@@ -87,9 +87,9 @@ def defu(p):
       d |= (pa ^ pb) << i
     return d
 ```
+
 </details>
 
----
 
 ## Libc leak
 
@@ -99,7 +99,6 @@ Now that the 8th friend is in a small bin, it's forward pointer is a pointer to 
 
 We then show that movie and obtain a libc leak to use in our future exploit chain.
 
----
 
 ## Chunk Misalignment to Overwrite Tcache
 
@@ -274,5 +273,3 @@ free_hook: 0x7feb0d192e40
  $ cat flag.txt
 PCTF{N0w_YOu_Kn0w_S4f3_L1nk1ng!}
 ```
-
----

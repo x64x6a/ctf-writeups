@@ -13,7 +13,6 @@ Episodes
     cobol.pwni.ng 3083
 ```
 
----
 
 ## Overview
 
@@ -24,7 +23,6 @@ Our solution to this challenge can be broken up into three steps:
 * Copy a file to trigger use-after-free to overwrite tcache entry with `__free_hook`
 * Write one_gadget to `__free_hook` and trigger a free to obtain a system shell
 
----
 
 ## Libc leak
 
@@ -34,7 +32,6 @@ We can leak segment mappings by reading from `/proc/self/maps`, however, we are 
 do_copy("/proc/self/maps", "/dev/stdout")
 ```
 
----
 
 ## Use-After-Free
 
@@ -110,7 +107,6 @@ CBL_COPY_FILE (unsigned char *fname1, unsigned char *fname2)
 
 </details>
 
----
 
 ## Modifying Tcache
 
@@ -135,5 +131,3 @@ Run `/freader` for flag
 $ /freader
 PCTF{l3arning_n3w_languag3_sh0uld_start_with_g00d_bugs_99d4ec917d097f63107e}
 ```
-
----
