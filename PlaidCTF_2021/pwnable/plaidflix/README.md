@@ -67,7 +67,7 @@ From this function, we can pass the leaked safe link value and obtain a valid he
 
 After the CTF ended, we discovered other solutions that are likely more efficient:
 <details>
-  <summary>[hkraw's](https://gist.github.com/hkraw/0576a28c5436734d0fbe6d8ddd378143#file-plaidctf-plaidflix-py-L8)</summary>
+  <summary>hkraw's - https://gist.github.com/hkraw/0576a28c5436734d0fbe6d8ddd378143#file-plaidctf-plaidflix-py-L8</summary>
 ```python
 def demangle(obfus_ptr):
     o2 = (obfus_ptr >> 12) ^ obfus_ptr
@@ -76,7 +76,7 @@ def demangle(obfus_ptr):
 </details>
 
 <details>
-  <summary>[MaherAzzou1zi's](https://github.com/MaherAzzouzi/LinuxExploitation/blob/master/PlaidCTF-plaidflix/solve.py#L83)</summary>
+  <summary>MaherAzzou1zi's - https://github.com/MaherAzzouzi/LinuxExploitation/blob/master/PlaidCTF-plaidflix/solve.py#L83</summary>
 
 ```python
 def defu(p):
