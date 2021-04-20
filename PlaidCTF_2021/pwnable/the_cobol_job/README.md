@@ -21,8 +21,8 @@ This challenge allowed a user to create, open, read, write, close, and copy file
 
 Our solution to this challenge can be broken up into three steps:
 * Obtaining libc base from `/proc/self/maps`
-* Copy a file to trigger use-after-free to overwrite tcache entry with `free_hook`
-* Write one_gadget to `free_hook` and trigger a free to obtain a system shell
+* Copy a file to trigger use-after-free to overwrite tcache entry with `__free_hook`
+* Write one_gadget to `__free_hook` and trigger a free to obtain a system shell
 
 ---
 
@@ -114,16 +114,16 @@ CBL_COPY_FILE (unsigned char *fname1, unsigned char *fname2)
 
 ## Modifying Tcache
 
-The freed value above will be pushed into a tcachebin if that tcachebin is not full.  We can control which tcachebin is used here through the size of the source's filename, as the same buffer for the source's filename is also used for the source's contents.
+The freed value above will be pushed into a tcache bin if that tcache bin is not full.  We can control which tcache bin is used here through the size of the source's filename, as the same buffer for the source's filename is also used for the source's contents.
 
-We created and opened a file with a filename length of 0x30 with some arbitrary file size that differs.  The length of 0x30 is used so we fall into the 0x40 size tcachebin. We then wrote the address of `free_hook` into the file such that it would overwrite the freed memory's forward and back pointers.  We then copy this file with a new file with a different filename size.  This will allocate the first filename, load it into the 0x40 tcache by freeing it, and then set the `free_hook` address as the chunk's forward and back pointers.  This will manipulate the 0x40 tcachebin such that the 2nd 0x40 allocation request will return the address to `free_hook`.  The next 0x40 allocation will return the freed address.
+We created and opened a file with a filename length of 0x30 with some arbitrary file size that differs.  The length of 0x30 is used so we fall into the 0x40 size tcache bin. We then wrote the address of `__free_hook` into the file such that it would overwrite the freed memory's forward and back pointers.  We then copy this file with a new file with a different filename size.  This will allocate the first filename, load it into the 0x40 tcache by freeing it, and then set the `__free_hook` address as the chunk's forward and back pointers.  This will manipulate the 0x40 tcache bin such that the 2nd 0x40 allocation request will return the address to `__free_hook`.  The next 0x40 allocation will return the freed address.
 
-The 0x40 tcachebin will now look something like this:
+The 0x40 tcache bin will now look something like this:
 ```c
 0x40 [  3]: 0x559497863700 —▸ 0x7f994e3368d8 (__free_hook-16) —▸ 0x7f994e9fd340 ◂— 0x7f994e9fd340
 ```
 
-We then created and opened a new file with some other filename length and a file size of 0x38 for the 0x40 bin.  The create will pop off the 1st 0x40 entry and the open will pop off the 2nd 0x40 entry, `free_hook`, into a data buffer.  We then write into this buffer by writing to the newly open file the magic one_gadget.  We then close this file to trigger a call to `free()` and in turn jumping to our one_gadget value in `free_hook`.  We ran `/freader` to obtain the flag.
+We then created and opened a new file with some other filename length and a file size of 0x38 for the 0x40 bin.  The create will pop off the 1st 0x40 entry and the open will pop off the 2nd 0x40 entry, `__free_hook`, into a data buffer.  We then write into this buffer by writing to the newly open file the magic one_gadget.  We then close this file to trigger a call to `free()` and in turn jumping to our one_gadget value in `__free_hook`.  We ran `/freader` to obtain the flag.
 
 ```
 [+] Opening connection to cobol.pwni.ng on port 3083: Done
