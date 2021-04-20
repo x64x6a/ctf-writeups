@@ -48,6 +48,7 @@ while ((i = read (fd1, fn1, sizeof(fn1))) > 0) {
 ```
 
 Source reference: https://github.com/cooljeanius/open-cobol/blob/6391bcc51b26672d482e768cafc69d16a12036d5/libcob/fileio.c#L4710
+
 <details>
   <summary>CBL_COPY_FILE() function</summary>
 
